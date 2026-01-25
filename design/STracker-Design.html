@@ -1,0 +1,691 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>STracker — Концепт UI</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: #111824;
+      --panel-2: #0f1520;
+      --card: #141c29;
+      --card-2: #172234;
+      --text: #e6edf6;
+      --muted: #9aa7b8;
+      --accent: #7c8cff;
+      --accent-2: #59d2a3;
+      --danger: #ff6b6b;
+      --warning: #f6c177;
+      --good: #6be675;
+      --border: #233045;
+      --chip: #1b2740;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --font: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(124,140,255,.25), transparent 60%),
+                  radial-gradient(800px 500px at 90% 0%, rgba(89,210,163,.15), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), #b6c0ff);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: #0b0f14;
+      box-shadow: var(--shadow);
+    }
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    .cta {
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .phone {
+      background: linear-gradient(180deg, #101826, #0d121b 60%);
+      border: 1px solid var(--border);
+      border-radius: 34px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .phone-inner {
+      background: var(--panel);
+      border-radius: 26px;
+      padding: 16px;
+      min-height: 620px;
+      position: relative;
+      overflow: hidden;
+    }
+    .status {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .h1 { font-size: 18px; font-weight: 700; }
+    .pill {
+      background: var(--chip);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .big-cta {
+      background: linear-gradient(135deg, var(--accent), #91a0ff);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      font-weight: 700;
+      text-align: center;
+      color: #0b0f14;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+    .section {
+      margin: 18px 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: .2px;
+      text-transform: uppercase;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .card-title { font-weight: 600; }
+    .card-sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .stat {
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      text-align: center;
+    }
+    .stat b { font-size: 16px; }
+    .nav {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-around;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .nav .active { color: var(--text); font-weight: 600; }
+
+    .exercise-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(124,140,255,.15);
+      color: #b7c0ff;
+      border: 1px solid rgba(124,140,255,.35);
+    }
+    .progress {
+      height: 6px;
+      background: #0d141f;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .progress > span {
+      display: block;
+      height: 100%;
+      width: 68%;
+      background: linear-gradient(90deg, var(--accent-2), #8af3c9);
+    }
+
+    .sets {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 12px;
+    }
+    .sets th, .sets td {
+      border-bottom: 1px solid var(--border);
+      padding: 8px 4px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .sets th { color: var(--muted); font-weight: 500; }
+    .sets td b { color: var(--text); }
+    .add-set {
+      margin-top: 10px;
+      padding: 10px;
+      text-align: center;
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+      color: var(--muted);
+    }
+    .footer-cta {
+      margin-top: 12px;
+      padding: 14px;
+      border-radius: 14px;
+      text-align: center;
+      background: var(--accent);
+      color: #0b0f14;
+      font-weight: 700;
+    }
+
+    .chart {
+      height: 140px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(124,140,255,.15), transparent);
+      border: 1px solid var(--border);
+      margin-top: 8px;
+      display: grid;
+      align-items: end;
+      padding: 12px;
+      gap: 6px;
+    }
+    .bar {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      align-items: end;
+    }
+    .bar span {
+      background: linear-gradient(180deg, #91a0ff, #5060ff);
+      border-radius: 8px 8px 0 0;
+      height: 20%;
+    }
+    .bar span:nth-child(1) { height: 28%; }
+    .bar span:nth-child(2) { height: 34%; }
+    .bar span:nth-child(3) { height: 38%; }
+    .bar span:nth-child(4) { height: 52%; }
+    .bar span:nth-child(5) { height: 64%; }
+    .bar span:nth-child(6) { height: 72%; }
+
+    .chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 2px; }
+    .chip {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--chip);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .legend-item {
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .advice {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(89,210,163,.12);
+      color: #c8f7e5;
+      margin-top: 8px;
+      font-size: 12px;
+    }
+    .advice b { color: #eafff5; }
+
+    .search {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .tag {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--chip);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">ST</div>
+        <div>
+          <div class="title">STracker — концепт дизайна</div>
+          <div class="subtitle">Темная тема, минималистичная аналитика, акцент на прогрессию</div>
+        </div>
+      </div>
+      <div class="cta">Jan 25 • 3 экрана</div>
+    </div>
+
+    <div class="grid">
+      <!-- Home Screen -->
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status">
+            <span>09:41</span>
+            <span>LTE • 82%</span>
+          </div>
+          <div class="header">
+            <div class="h1">STracker</div>
+            <div class="pill">⚙️ Настройки</div>
+          </div>
+
+          <div class="big-cta">🏋️ НАЧАТЬ ТРЕНИРОВКУ</div>
+
+          <div class="section">Последняя тренировка</div>
+          <div class="card">
+            <div class="card-row">
+              <div>
+                <div class="card-title">Грудь + Трицепс</div>
+                <div class="card-sub">Вчера • 45 минут • 6 упражнений</div>
+              </div>
+              <div class="badge">Завершена</div>
+            </div>
+            <div class="progress"><span></span></div>
+          </div>
+
+          <div class="section">Быстрая статистика</div>
+          <div class="stat-grid">
+            <div class="stat"><b>52</b><div class="card-sub">тренировок</div></div>
+            <div class="stat"><b>156</b><div class="card-sub">упражнений</div></div>
+            <div class="stat"><b>12</b><div class="card-sub">активных дней</div></div>
+          </div>
+
+          <div class="section">Совет дня</div>
+          <div class="card">
+            <div class="card-title">Плавная прогрессия</div>
+            <div class="card-sub">Если RPE ≥ 9, удерживаем вес без прибавки.</div>
+          </div>
+
+          <div class="nav">
+            <div class="active">🏠 Home</div>
+            <div>📜 История</div>
+            <div>💪 Упражнения</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Workout -->
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status">
+            <span>09:41</span>
+            <span>⏱️ 32:15</span>
+          </div>
+          <div class="header">
+            <div class="h1">Тренировка</div>
+            <div class="pill">Активна</div>
+          </div>
+
+          <div class="exercise-card">
+            <div class="card-row">
+              <div>
+                <div class="card-title">Жим штанги лёжа</div>
+                <div class="card-sub">Прошлый раз: 80×8, 8, 7</div>
+              </div>
+              <div class="badge">Compound</div>
+            </div>
+            <div class="advice">📈 <b>Рекомендация:</b> 82.5 кг × 8 (прогрессия +2.5 кг)</div>
+
+            <table class="sets">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Вес</th>
+                  <th>Повт</th>
+                  <th>RPE</th>
+                  <th>✓</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td><b>80</b></td>
+                  <td><b>8</b></td>
+                  <td>7</td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td><b>80</b></td>
+                  <td><b>8</b></td>
+                  <td>8</td>
+                  <td>✓</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td><b>82.5</b></td>
+                  <td><b>7</b></td>
+                  <td>9</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="add-set">+ Добавить подход</div>
+          </div>
+
+          <div class="exercise-card">
+            <div class="card-row">
+              <div>
+                <div class="card-title">Разводка гантелей</div>
+                <div class="card-sub">3 подхода завершено</div>
+              </div>
+              <div class="badge">Isolation</div>
+            </div>
+          </div>
+
+          <div class="exercise-card" style="border-style:dashed">
+            ➕ Добавить упражнение
+          </div>
+
+          <div class="footer-cta">🏁 Завершить тренировку</div>
+        </div>
+      </div>
+
+      <!-- Exercise Detail -->
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status">
+            <span>09:41</span>
+            <span>LTE • 82%</span>
+          </div>
+          <div class="header">
+            <div class="h1">Жим штанги лёжа</div>
+            <div class="pill">📈 e1RM</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Прогресс e1RM</div>
+            <div class="card-sub">95 кг • последние 6 сессий</div>
+            <div class="chart">
+              <div class="bar">
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="legend">
+              <div class="legend-item">Среднее: 93 кг</div>
+              <div class="legend-item">Тренд: +2.8%</div>
+            </div>
+          </div>
+
+          <div class="section">Фильтры</div>
+          <div class="chip-row">
+            <div class="chip">Epley</div>
+            <div class="chip">Период 3 мес</div>
+            <div class="chip">Только рабочие</div>
+          </div>
+
+          <div class="section">Последние выполнения</div>
+          <div class="card">
+            <div class="card-title">23 янв 2026</div>
+            <div class="card-sub">80×8, 80×8, 82.5×7</div>
+            <div class="card-sub">e1RM: 96 кг • Объём: 1925 кг</div>
+          </div>
+          <div class="card">
+            <div class="card-title">20 янв 2026</div>
+            <div class="card-sub">80×8, 80×7, 80×6</div>
+            <div class="card-sub">e1RM: 93 кг • Объём: 1680 кг</div>
+          </div>
+
+          <div class="nav">
+            <div>🏠 Home</div>
+            <div>📜 История</div>
+            <div class="active">💪 Упражнения</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px;" class="grid">
+      <!-- Exercise Library -->
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status">
+            <span>09:41</span>
+            <span>LTE • 82%</span>
+          </div>
+          <div class="header">
+            <div class="h1">Упражнения</div>
+            <div class="pill">➕</div>
+          </div>
+
+          <div class="search">🔍 Поиск упражнения</div>
+          <div class="filter-row">
+            <div class="tag">Все</div>
+            <div class="tag">Грудь</div>
+            <div class="tag">Спина</div>
+            <div class="tag">Ноги</div>
+            <div class="tag">Плечи</div>
+            <div class="tag">Руки</div>
+          </div>
+
+          <div class="section">Базовые</div>
+          <div class="card">
+            <div class="card-row">
+              <div>
+                <div class="card-title">Жим штанги лёжа</div>
+                <div class="card-sub">Грудь • Последний: 82.5 кг</div>
+              </div>
+              <div class="badge">Compound</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-row">
+              <div>
+                <div class="card-title">Присед со штангой</div>
+                <div class="card-sub">Ноги • Последний: 100 кг</div>
+              </div>
+              <div class="badge">Compound</div>
+            </div>
+          </div>
+
+          <div class="section">Изолирующие</div>
+          <div class="card">
+            <div class="card-row">
+              <div>
+                <div class="card-title">Сгибание на бицепс</div>
+                <div class="card-sub">Руки • Последний: 14 кг</div>
+              </div>
+              <div class="badge">Isolation</div>
+            </div>
+          </div>
+
+          <div class="note">* Автозаполнение последнего веса при выборе упражнения</div>
+
+          <div class="nav">
+            <div>🏠 Home</div>
+            <div>📜 История</div>
+            <div class="active">💪 Упражнения</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workout History -->
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status">
+            <span>09:41</span>
+            <span>LTE • 82%</span>
+          </div>
+          <div class="header">
+            <div class="h1">История</div>
+            <div class="pill">Фильтр</div>
+          </div>
+
+          <div class="section">На этой неделе</div>
+          <div class="card">
+            <div class="card-title">23 янв • Грудь + Трицепс</div>
+            <div class="card-sub">6 упражнений • 45 мин • 18 подходов</div>
+          </div>
+          <div class="card">
+            <div class="card-title">21 янв • Ноги</div>
+            <div class="card-sub">5 упражнений • 40 мин • 15 подходов</div>
+          </div>
+
+          <div class="section">Ранее</div>
+          <div class="card">
+            <div class="card-title">18 янв • Спина + Бицепс</div>
+            <div class="card-sub">7 упражнений • 52 мин • 20 подходов</div>
+          </div>
+
+          <div class="nav">
+            <div>🏠 Home</div>
+            <div class="active">📜 История</div>
+            <div>💪 Упражнения</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Workout (compact) -->
+      <div class="phone">
+        <div class="phone-inner">
+          <div class="status">
+            <span>09:41</span>
+            <span>Deload</span>
+          </div>
+          <div class="header">
+            <div class="h1">Готовность</div>
+            <div class="pill">Индикатор</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Состояние нагрузки</div>
+            <div class="card-sub">e1RM за 3 сессии: 92 → 94 → 96 кг</div>
+            <div class="advice">✅ <b>ПРОГРЕССИЯ:</b> +2.5 кг, RPE &lt; 9</div>
+          </div>
+
+          <div class="card" style="background: rgba(246,193,119,.12); color:#ffe9c4;">
+            <div class="card-title">Предупреждение</div>
+            <div class="card-sub">Последняя пауза &gt; 14 дней → deload -20%</div>
+          </div>
+
+          <div class="card" style="background: rgba(255,107,107,.12); color:#ffd1d1;">
+            <div class="card-title">Регрессия</div>
+            <div class="card-sub">e1RM падает &gt; 5% → снизить вес на 10%</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Переключение формулы</div>
+            <div class="chip-row">
+              <div class="chip">Epley</div>
+              <div class="chip">Brzycki</div>
+            </div>
+          </div>
+
+          <div class="footer-cta">Показать детали тренда</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

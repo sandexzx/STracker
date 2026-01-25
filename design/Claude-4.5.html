@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STracker - Дизайн прототип</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .device-frame {
+            width: 375px;
+            height: 812px;
+            background: #fff;
+            border-radius: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 16px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 60px;
+        }
+
+        .top-bar-title {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .top-bar-icon {
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .top-bar-icon:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #f0f0f0;
+        }
+
+        .nav-item.active {
+            color: #667eea;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+            margin: 24px 0 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .exercise-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .exercise-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .exercise-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .recommendation {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .sets-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .sets-table th {
+            text-align: left;
+            padding: 8px;
+            font-size: 12px;
+            color: #666;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .sets-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .set-input {
+            width: 60px;
+            padding: 6px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .timer {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .chart {
+            background: #f9f9f9;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            gap: 8px;
+        }
+
+        .chart-bar {
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge.trending-up {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge.trending-down {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 16px;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+
+        .chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chip.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .add-button {
+            position: fixed;
+            bottom: 80px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .add-button:hover {
+            transform: scale(1.1);
+        }
+
+        .back-button {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .workout-summary {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card, .exercise-card {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="device-frame">
+        <!-- Home Screen -->
+        <div class="screen active" id="home-screen">
+            <div class="top-bar">
+                <div class="top-bar-title">STracker</div>
+                <div class="top-bar-icon">⚙️</div>
+            </div>
+            <div class="content">
+                <button class="btn-primary" onclick="navigateTo('active-workout')">
+                    🏋️ НАЧАТЬ ТРЕНИРОВКУ
+                </button>
+
+                <div class="section-title">Последняя тренировка</div>
+                <div class="card" onclick="navigateTo('workout-detail')">
+                    <div class="card-header">📅 Вчера, 18:30</div>
+                    <div class="card-title">Грудь + Трицепс</div>
+                    <div class="card-subtitle">6 упражнений • 45 мин</div>
+                </div>
+
+                <div class="section-title">Быстрая статистика</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">52</div>
+                        <div class="stat-label">тренировок</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">156</div>
+                        <div class="stat-label">упражнений</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">активных дней</div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-nav">
+                <div class="nav-item active" onclick="navigateTo('home')">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Главная</div>
+                </div>
+                <div class="nav-item" onclick="navigateTo('history')">
+                    <div class="nav-icon">📜</div>
+                    <div class="nav-label">История</div>
+                </div>
+                <div class="nav-item" onclick="navigateTo('exercises')">
+                    <div class="nav-icon">💪</div>
+                    <div class="nav-label">Упражнения</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Workout Screen -->
+        <div class="screen" id="active-workout-screen">
+            <div class="top-bar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="back-button" onclick="navigateTo('home')">←</span>
+                    <div class="top-bar-title">Тренировка</div>
+                </div>
+                <div class="timer">⏱️ 32:15</div>
+            </div>
+            <div class="content">
+                <div class="exercise-card">
+                    <div class="exercise-header">
+                        <div class="exercise-name">Жим штанги лёжа</div>
+                        <div>▼</div>
+                    </div>
+                    <div class="exercise-info">Прошлый раз: 80кг × 8, 8, 7</div>
+                    <div class="recommendation">
+                        📈 Рекомендация: 82.5кг × 8
+                    </div>
+                    <table class="sets-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Вес</th>
+                                <th>Повт</th>
+                                <th>RPE</th>
+                                <th>✓</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td><input type="number" class="set-input" value="80" disabled></td>
+                                <td><input type="number" class="set-input" value="8" disabled></td>
+                                <td><input type="number" class="set-input" value="7" disabled></td>
+                                <td><input type="checkbox" class="checkbox" checked disabled></td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td><input type="number" class="set-input" value="80" disabled></td>
+                                <td><input type="number" class="set-input" value="8" disabled></td>
+                                <td><input type="number" class="set-input" value="8" disabled></td>
+                                <td><input type="checkbox" class="checkbox" checked disabled></td>
+                            </tr>
+                            <tr style="background: #f0f0ff;">
+                                <td>3</td>
+                                <td><input type="number" class="set-input" value="82.5"></td>
+                                <td><input type="number" class="set-input" value="7"></td>
+                                <td><input type="number" class="set-input" value="9"></td>
+                                <td><input type="checkbox" class="checkbox"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button class="btn-secondary" style="margin-top: 12px;">+ Добавить подход</button>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-header">
+                        <div class="exercise-name">Разводка гантелей</div>
+                        <div>✓</div>
+                    </div>
+                    <div class="exercise-info">3 подхода завершено</div>
+                </div>
+
+                <button class="btn-secondary" onclick="alert('Выбор упражнения')">
+                    ➕ Добавить упражнение
+                </button>
+
+                <button class="btn-primary" style="margin-top: 24px;">
+                    🏁 ЗАВЕРШИТЬ ТРЕНИРОВКУ
+                </button>
+            </div>
+        </div>
+
+        <!-- Exercise Library Screen -->
+        <div class="screen" id="exercises-screen">
+            <div class="top-bar">
+                <div class="top-bar-title">Упражнения</div>
+                <div class="top-bar-icon" onclick="alert('Создать упражнение')">➕</div>
+            </div>
+            <div class="content">
+                <input type="text" class="search-bar" placeholder="🔍 Поиск...">
+                
+                <div class="filter-chips">
+                    <div class="chip active">Все</div>
+                    <div class="chip">Грудь</div>
+                    <div class="chip">Спина</div>
+                    <div class="chip">Ноги</div>
+                    <div class="chip">Плечи</div>
+                    <div class="chip">Руки</div>
+                </div>
+
+                <div class="section-title">Базовые</div>
+                <div class="exercise-card" onclick="navigateTo('exercise-detail')">
+                    <div class="exercise-header">
+                        <div>
+                            <div class="exercise-name">🏋️ Жим штанги лёжа</div>
+                            <div class="exercise-info">Грудь • Последний: 82.5кг</div>
+                        </div>
+                        <span class="badge trending-up">↗ +2.5%</span>
+                    </div>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-header">
+                        <div>
+                            <div class="exercise-name">🏋️ Присед со штангой</div>
+                            <div class="exercise-info">Ноги • Последний: 100кг</div>
+                        </div>
+                        <span class="badge trending-up">↗ +5%</span>
+                    </div>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-header">
+                        <div>
+                            <div class="exercise-name">🏋️ Становая тяга</div>
+                            <div class="exercise-info">Спина • Последний: 120кг</div>
+                        </div>
+                        <span class="badge">→ 0%</span>
+                    </div>
+                </div>
+
+                <div class="section-title">Изолирующие</div>
+                <div class="exercise-card">
+                    <div class="exercise-header">
+                        <div>
+                            <div class="exercise-name">💪 Сгибание на бицепс</div>
+                            <div class="exercise-info">Руки • Последний: 14кг</div>
+                        </div>
+                        <span class="badge trending-up">↗ +1кг</span>
+                    </div>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-header">
+                        <div>
+                            <div class="exercise-name">💪 Разгибание на трицепс</div>
+                            <div class="exercise-info">Руки • Последний: 25кг</div>
+                        </div>
+                        <span class="badge">→ 0%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-nav">
+                <div class="nav-item" onclick="navigateTo('home')">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Главная</div>
+                </div>
+                <div class="nav-item" onclick="navigateTo('history')">
+                    <div class="nav-icon">📜</div>
+                    <div class="nav-label">История</div>
+                </div>
+                <div class="nav-item active" onclick="navigateTo('exercises')">
+                    <div class="nav-icon">💪</div>
+                    <div class="nav-label">Упражнения</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercise Detail Screen -->
+        <div class="screen" id="exercise-detail-screen">
+            <div class="top-bar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="back-button" onclick="navigateTo('exercises')">←</span>
+                    <div class="top-bar-title">Жим штанги лёжа</div>
+                </div>
+                <div class="top-bar-icon">✏️</div>
+            </div>
+            <div class="content">
+                <div class="card">
+                    <div class="card-header">📈 Прогресс e1RM</div>
+                    <div style="font-size: 32px; font-weight: 700; color: #667eea; margin: 8px 0;">95кг</div>
+                    <div class="chart">
+                        <div class="chart-bar" style="height: 60%;"></div>
+                        <div class="chart-bar" style="height: 70%;"></div>
+                        <div class="chart-bar" style="height: 75%;"></div>
+                        <div class="chart-bar" style="height: 80%;"></div>
+                        <div class="chart-bar" style="height: 85%;"></div>
+                        <div class="chart-bar" style="height: 95%;"></div>
+                        <div class="chart-bar" style="height: 100%;"></div>
+                        <div class="chart-bar" style="height: 98%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666;">
+                        <span>Янв</span>
+                        <span>Фев</span>
+                        <span>Мар</span>
+                        <span>Апр</span>
+                    </div>
+                </div>
+
+                <div class="section-title">Последние выполнения</div>
+                
+                <div class="card">
+                    <div class="card-header">📅 23 янв 2026</div>
+                    <div class="card-title">80×8, 80×8, 82.5×7</div>
+                    <div class="workout-summary" style="margin-top: 12px;">
+                        <div class="summary-item">
+                            <div class="summary-value">96кг</div>
+                            <div class="summary-label">e1RM</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">1925кг</div>
+                            <div class="summary-label">Объём</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">3</div>
+                            <div class="summary-label">Подходов</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">📅 20 янв 2026</div>
+                    <div class="card-title">80×8, 80×7, 80×6</div>
+                    <div class="workout-summary" style="margin-top: 12px;">
+                        <div class="summary-item">
+                            <div class="summary-value">93кг</div>
+                            <div class="summary-label">e1RM</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">1680кг</div>
+                            <div class="summary-label">Объём</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">3</div>
+                            <div class="summary-label">Подходов</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">📅 17 янв 2026</div>
+                    <div class="card-title">77.5×8, 77.5×8, 77.5×8</div>
+                    <div class="workout-summary" style="margin-top: 12px;">
+                        <div class="summary-item">
+                            <div class="summary-value">91кг</div>
+                            <div class="summary-label">e1RM</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">1860кг</div>
+                            <div class="summary-label">Объём</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">3</div>
+                            <div class="summary-label">Подходов</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workout History Screen -->
+        <div class="screen" id="history-screen">
+            <div class="top-bar">
+                <div class="top-bar-title">История</div>
+                <div class="top-bar-icon">📊</div>
+            </div>
+            <div class="content">
+                <div class="section-title">Эта неделя</div>
+                
+                <div class="card" onclick="navigateTo('workout-detail')">
+                    <div class="card-header">📅 Вчера, 18:30</div>
+                    <div class="card-title">Грудь + Трицепс</div>
+                    <div class="card-subtitle">6 упражнений • 45 мин</div>
+                    <div class="workout-summary" style="margin-top: 12px;">
+                        <div class="summary-item">
+                            <div class="summary-value">18</div>
+                            <div class="summary-label">Подходов</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">4.2т</div>
+                            <div class="summary-label">Объём</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">📅 3 дня назад, 19:00</div>
+                    <div class="card-title">Спина + Бицепс</div>
+                    <div class="card-subtitle">5 упражнений • 52 мин</div>
+                    <div class="workout-summary" style="margin-top: 12px;">
+                        <div class="summary-item">
+                            <div class="summary-value">15</div>
+                            <div class="summary-label">Подходов</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">3.8т</div>
+                            <div class="summary-label">Объём</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Прошлая неделя</div>
+
+                <div class="card">
+                    <div class="card-header">📅 6 дней назад, 18:15</div>
+                    <div class="card-title">Ноги</div>
+                    <div class="card-subtitle">7 упражнений • 58 мин</div>
+                    <div class="workout-summary" style="margin-top: 12px;">
+                        <div class="summary-item">
+                            <div class="summary-value">21</div>
+                            <div class="summary-label">Подходов</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">5.1т</div>
+                            <div class="summary-label">Объём</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">📅 8 дней назад, 19:30</div>
+                    <div class="card-title">Плечи + Руки</div>
+                    <div class="card-subtitle">6 упражнений • 40 мин</div>
+                    <div class="workout-summary" style="margin-top: 12px;">
+                        <div class="summary-item">
+                            <div class="summary-value">18</div>
+                            <div class="summary-label">Подходов</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">2.9т</div>
+                            <div class="summary-label">Объём</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-nav">
+                <div class="nav-item" onclick="navigateTo('home')">
+                    <div class="nav-icon">🏠</div>
+                    <div class="nav-label">Главная</div>
+                </div>
+                <div class="nav-item active" onclick="navigateTo('history')">
+                    <div class="nav-icon">📜</div>
+                    <div class="nav-label">История</div>
+                </div>
+                <div class="nav-item" onclick="navigateTo('exercises')">
+                    <div class="nav-icon">💪</div>
+                    <div class="nav-label">Упражнения</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workout Detail Screen -->
+        <div class="screen" id="workout-detail-screen">
+            <div class="top-bar">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="back-button" onclick="navigateTo('history')">←</span>
+                    <div class="top-bar-title">Детали тренировки</div>
+                </div>
+                <div class="top-bar-icon">✏️</div>
+            </div>
+            <div class="content">
+                <div class="card">
+                    <div class="card-header">📅 Вчера, 18:30 - 19:15</div>
+                    <div class="card-title">Грудь + Трицепс</div>
+                    <div class="workout-summary" style="margin-top: 12px;">
+                        <div class="summary-item">
+                            <div class="summary-value">45 мин</div>
+                            <div class="summary-label">Длительность</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">6</div>
+                            <div class="summary-label">Упражнений</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value">18</div>
+                            <div class="summary-label">Подходов</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-title">Упражнения</div>
+
+                <div class="exercise-card">
+                    <div class="exercise-name">🏋️ Жим штанги лёжа</div>
+                    <div class="exercise-info" style="margin-top: 8px;">80×8, 80×8, 82.5×7</div>
+                    <div style="font-size: 12px; color: #999; margin-top: 4px;">e1RM: 96кг • Объём: 1925кг</div>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-name">🏋️ Жим гантелей на наклонной</div>
+                    <div class="exercise-info" style="margin-top: 8px;">28×10, 28×9, 28×8</div>
+                    <div style="font-size: 12px; color: #999; margin-top: 4px;">e1RM: 38кг • Объём: 756кг</div>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-name">💪 Разводка гантелей</div>
+                    <div class="exercise-info" style="margin-top: 8px;">14×12, 14×12, 14×10</div>
+                    <div style="font-size: 12px; color: #999; margin-top: 4px;">e1RM: 20кг • Объём: 476кг</div>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-name">💪 Французский жим</div>
+                    <div class="exercise-info" style="margin-top: 8px;">22×10, 22×9, 22×8</div>
+                    <div style="font-size: 12px; color: #999; margin-top: 4px;">e1RM: 30кг • Объём: 594кг</div>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-name">💪 Разгибание на трицепс</div>
+                    <div class="exercise-info" style="margin-top: 8px;">25×12, 25×11, 25×10</div>
+                    <div style="font-size: 12px; color: #999; margin-top: 4px;">e1RM: 35кг • Объём: 825кг</div>
+                </div>
+
+                <div class="exercise-card">
+                    <div class="exercise-name">💪 Отжимания на брусьях</div>
+                    <div class="exercise-info" style="margin-top: 8px;">+10×10, +10×9, +10×8</div>
+                    <div style="font-size: 12px; color: #999; margin-top: 4px;">e1RM: 14кг • Объём: 270кг</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function navigateTo(screen) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            
+            // Show selected screen
+            let screenId;
+            switch(screen) {
+                case 'home':
+                    screenId = 'home-screen';
+                    break;
+                case 'active-workout':
+                    screenId = 'active-workout-screen';
+                    break;
+                case 'exercises':
+                    screenId = 'exercises-screen';
+                    break;
+                case 'exercise-detail':
+                    screenId = 'exercise-detail-screen';
+                    break;
+                case 'history':
+                    screenId = 'history-screen';
+                    break;
+                case 'workout-detail':
+                    screenId = 'workout-detail-screen';
+                    break;
+                default:
+                    screenId = 'home-screen';
+            }
+            
+            document.getElementById(screenId).classList.add('active');
+            
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        // Add interactivity to chips
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

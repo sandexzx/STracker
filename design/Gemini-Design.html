@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STracker Design Prototype</title>
+    <style>
+        :root {
+            --md-sys-color-primary: #D0BCFF;
+            --md-sys-color-on-primary: #381E72;
+            --md-sys-color-primary-container: #4F378B;
+            --md-sys-color-on-primary-container: #EADDFF;
+            --md-sys-color-secondary: #CCC2DC;
+            --md-sys-color-on-secondary: #332D41;
+            --md-sys-color-secondary-container: #4A4458;
+            --md-sys-color-on-secondary-container: #E8DEF8;
+            --md-sys-color-tertiary: #EFB8C8;
+            --md-sys-color-on-tertiary: #492532;
+            --md-sys-color-tertiary-container: #633B48;
+            --md-sys-color-on-tertiary-container: #FFD8E4;
+            --md-sys-color-error: #F2B8B5;
+            --md-sys-color-on-error: #601410;
+            --md-sys-color-error-container: #8C1D18;
+            --md-sys-color-on-error-container: #F9DEDC;
+            --md-sys-color-background: #1C1B1F;
+            --md-sys-color-on-background: #E6E1E5;
+            --md-sys-color-surface: #1C1B1F;
+            --md-sys-color-on-surface: #E6E1E5;
+            --md-sys-color-surface-variant: #49454F;
+            --md-sys-color-on-surface-variant: #CAC4D0;
+            --md-sys-color-outline: #938F99;
+            --radius-xl: 28px;
+            --radius-l: 16px;
+            --radius-m: 12px;
+            --radius-s: 8px;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #0f0f0f;
+            color: var(--md-sys-color-on-background);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        h1, h2, h3, h4, p { margin: 0; }
+
+        .device-frame {
+            width: 375px;
+            height: 812px; /* iPhone X dimension roughly */
+            background-color: var(--md-sys-color-background);
+            border-radius: 40px;
+            border: 8px solid #333;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .status-bar {
+            height: 30px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            align-items: center;
+            font-size: 12px;
+            background: var(--md-sys-color-surface);
+            z-index: 10;
+        }
+
+        .top-app-bar {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--md-sys-color-surface);
+        }
+
+        .headline-small { font-size: 24px; font-weight: 400; }
+        .title-medium { font-size: 16px; font-weight: 500; letter-spacing: 0.15px; }
+        .label-large { font-size: 14px; font-weight: 500; letter-spacing: 0.1px; }
+        .body-medium { font-size: 14px; font-weight: 400; letter-spacing: 0.25px; }
+        .body-small { font-size: 12px; font-weight: 400; }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Components */
+        .card {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            border-radius: var(--radius-l);
+            padding: 16px;
+            margin-bottom: 8px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            color: var(--md-sys-color-on-surface);
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .btn-fab {
+            position: absolute;
+            bottom: 88px;
+            right: 16px;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .btn-large {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border-radius: 100px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            gap: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-large:hover { opacity: 0.9; }
+
+        .btn-tonal {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+            border-radius: 20px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-text {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .stat-item {
+            flex: 1;
+            background-color: var(--md-sys-color-surface-variant);
+            border-radius: var(--radius-m);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .navigation-bar {
+            height: 80px;
+            background-color: var(--md-sys-color-surface); /* Usually slightly elevated color in M3 */
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 64px;
+        }
+
+        .nav-item.active {
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .nav-icon {
+            width: 64px;
+            height: 32px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+
+        .nav-item.active .nav-icon {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+
+        /* Screen 2: Active Workout */
+        .set-row {
+            display: grid;
+            grid-template-columns: 24px 1fr 1fr 1fr 30px;
+            gap: 10px;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .set-header {
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 4px;
+            border-bottom: none;
+        }
+        
+        .input-box {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 4px;
+            color: white;
+            padding: 4px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 2px solid var(--md-sys-color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .checkbox.checked {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .recommendation {
+            background-color: #2F2A38; /* Slightly purplish tint */
+            border: 1px solid var(--md-sys-color-primary-container);
+            border-radius: var(--radius-s);
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--md-sys-color-on-surface-variant);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .trend-up { color: #81c784; }
+
+        /* Icons */
+        .icon { font-style: normal; }
+
+        /* Scrollbar hide */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
+
+        .hidden { display: none !important; }
+        .screen-label {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SCREEN 1: HOME -->
+    <div class="device-frame">
+        <div class="screen-label">Home Screen</div>
+        <div class="status-bar">
+            <span>9:30</span>
+            <span>📶 🔋</span>
+        </div>
+        
+        <div class="top-app-bar">
+            <span class="headline-small">STracker</span>
+            <span class="icon">⚙️</span>
+        </div>
+
+        <div class="content">
+            <!-- CTA -->
+            <div class="btn-large">
+                <span class="icon">🏋️</span> Start Empty Workout
+            </div>
+
+            <div style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); text-align: center; margin-top: -8px;">
+                or choose a template
+            </div>
+
+            <!-- Last Workout -->
+            <div>
+                <div class="label-large" style="margin-bottom: 8px; margin-top: 16px;">Last Session</div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="card-title">Chest & Triceps</div>
+                            <div class="body-small" style="color: var(--md-sys-color-on-surface-variant)">Yesterday, 18:30 • 45 min</div>
+                        </div>
+                        <span class="icon">chevron_right</span>
+                    </div>
+                    <div class="body-medium">
+                        • Bench Press: 80kg × 8<br>
+                        • Cable Fly: 12kg × 12<br>
+                        • Tricep Pushdown: 25kg × 15
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div>
+                <div class="label-large" style="margin-bottom: 8px; margin-top: 16px;">Overview</div>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-value">52</div>
+                        <div class="stat-label">Workouts</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">12.5t</div>
+                        <div class="stat-label">Volume</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Streak</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Activity (Placeholder chart) -->
+             <div class="card" style="margin-top: 16px; height: 100px; display: flex; align-items: flex-end; justify-content: space-between; padding-top: 24px;">
+                <div style="width: 12%; height: 30%; background: #49454F; border-radius: 4px;"></div>
+                <div style="width: 12%; height: 50%; background: #49454F; border-radius: 4px;"></div>
+                <div style="width: 12%; height: 0%; background: #49454F; border-radius: 4px;"></div>
+                <div style="width: 12%; height: 80%; background: var(--md-sys-color-primary); border-radius: 4px;"></div>
+                <div style="width: 12%; height: 40%; background: #49454F; border-radius: 4px;"></div>
+                <div style="width: 12%; height: 60%; background: #49454F; border-radius: 4px;"></div>
+                <div style="width: 12%; height: 0%; background: #49454F; border-radius: 4px;"></div>
+             </div>
+             <div style="display: flex; justify-content: space-between; padding: 0 8px; font-size: 10px; color: var(--md-sys-color-on-surface-variant);">
+                 <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+             </div>
+
+        </div>
+
+        <div class="navigation-bar">
+            <div class="nav-item active">
+                <div class="nav-icon"><span class="icon">🏠</span></div>
+                <span>Home</span>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon"><span class="icon">📜</span></div>
+                <span>History</span>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon"><span class="icon">💪</span></div>
+                <span>Exercises</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: ACTIVE WORKOUT -->
+    <div class="device-frame">
+        <div class="screen-label">Active Workout</div>
+        <div class="status-bar">
+            <span>10:15</span>
+            <span>📶 🔋</span>
+        </div>
+
+        <div class="top-app-bar">
+            <span class="icon">arrow_back</span>
+            <div style="text-align: center;">
+                <span class="title-medium" style="display:block;">Chest Day</span>
+                <span class="body-small" style="color: var(--md-sys-color-primary);">⏱️ 32:15</span>
+            </div>
+            <span class="btn-tonal" style="padding: 6px 16px; border-radius: 100px; font-size: 12px;">Finish</span>
+        </div>
+
+        <div class="content">
+            
+            <!-- Exercise 1 -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div style="padding: 16px 16px 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.05)">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span class="card-title">Bench Press (Barbell)</span>
+                        <span class="icon">more_vert</span>
+                    </div>
+                </div>
+                
+                <div style="padding: 12px 16px;">
+                    <!-- Recommendation -->
+                    <div class="recommendation">
+                        <span class="icon trend-up">📈</span>
+                        <div>
+                            <strong>Progression available:</strong> Try <b>82.5kg</b> for 8 reps.
+                            <div style="font-size: 10px; opacity: 0.7;">Last: 80kg × 8, 8, 7</div>
+                        </div>
+                    </div>
+
+                    <!-- Sets Header -->
+                    <div class="set-row set-header">
+                        <div style="text-align: center">#</div>
+                        <div style="text-align: center">kg</div>
+                        <div style="text-align: center">Reps</div>
+                        <div style="text-align: center">RPE</div>
+                        <div style="text-align: center">✓</div>
+                    </div>
+
+                    <!-- Set 1 -->
+                    <div class="set-row" style="opacity: 0.5;">
+                        <div style="text-align: center">1</div>
+                        <div>80</div>
+                        <div>8</div>
+                        <div>7</div>
+                        <div class="checkbox checked" style="margin: 0 auto;">✓</div>
+                    </div>
+
+                    <!-- Set 2 -->
+                    <div class="set-row" style="opacity: 0.5;">
+                        <div style="text-align: center">2</div>
+                        <div>80</div>
+                        <div>8</div>
+                        <div>8</div>
+                        <div class="checkbox checked" style="margin: 0 auto;">✓</div>
+                    </div>
+
+                     <!-- Set 3 (Active) -->
+                     <div class="set-row" style="background: rgba(208, 188, 255, 0.05); margin: 0 -16px; padding: 8px 16px;">
+                        <div style="text-align: center; color: var(--md-sys-color-primary); font-weight: bold;">3</div>
+                        <div><input type="text" class="input-box" value="82.5"></div>
+                        <div><input type="text" class="input-box" value="8"></div>
+                        <div><input type="text" class="input-box" placeholder="-"></div>
+                        <div class="checkbox" style="margin: 0 auto;"></div>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 12px;">
+                        <button class="btn-text">+ Add Set</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercise 2 -->
+             <div class="card" style="padding: 16px;">
+                <div class="card-header" style="margin-bottom: 0;">
+                    <span class="card-title">Incline Dumbbell Press</span>
+                    <span style="font-size: 12px; color: var(--md-sys-color-primary);">3 sets done ✓</span>
+                </div>
+             </div>
+
+             <!-- Add Exercise Button -->
+             <button class="btn-tonal" style="width: 100%; margin-top: 8px;">
+                 + Add Exercise
+             </button>
+
+             <!-- Cancel Button (at bottom) -->
+             <button class="btn-text" style="color: var(--md-sys-color-error); margin-top: 16px;">
+                 Discard Workout
+             </button>
+
+        </div>
+    </div>
+
+    <!-- SCREEN 3: EXERCISE LIBRARY -->
+    <div class="device-frame">
+        <div class="screen-label">Exercise Library</div>
+        <div class="status-bar">
+            <span>9:32</span>
+        </div>
+
+        <div class="top-app-bar">
+            <!-- Search bar simulation -->
+            <div style="
+                background: var(--md-sys-color-surface-variant); 
+                border-radius: 28px; 
+                flex: 1; 
+                padding: 10px 16px; 
+                display: flex; 
+                align-items: center; 
+                color: var(--md-sys-color-on-surface-variant);
+            ">
+                <span class="icon" style="margin-right: 12px;">🔍</span>
+                <span>Search exercises...</span>
+            </div>
+        </div>
+
+        <div class="content" style="padding-top: 0;">
+            <!-- Chips -->
+            <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 16px; margin: 0 -16px; padding: 0 16px 16px 16px;">
+                <div class="btn-tonal" style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);">All</div>
+                <div style="border: 1px solid var(--md-sys-color-outline); padding: 8px 16px; border-radius: 8px; font-size: 14px;">Chest</div>
+                <div style="border: 1px solid var(--md-sys-color-outline); padding: 8px 16px; border-radius: 8px; font-size: 14px;">Back</div>
+                <div style="border: 1px solid var(--md-sys-color-outline); padding: 8px 16px; border-radius: 8px; font-size: 14px;">Legs</div>
+            </div>
+
+            <div class="label-large" style="margin-bottom: 8px; color: var(--md-sys-color-primary);">Compound</div>
+            
+            <div class="card" style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center;">B</div>
+                <div>
+                    <div class="card-title">Bench Press (Barbell)</div>
+                    <div class="body-small" style="color: var(--md-sys-color-on-surface-variant);">Chest • 1RM: 105kg</div>
+                </div>
+            </div>
+
+            <div class="card" style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center;">S</div>
+                <div>
+                    <div class="card-title">Squat (Barbell)</div>
+                    <div class="body-small" style="color: var(--md-sys-color-on-surface-variant);">Legs • 1RM: 140kg</div>
+                </div>
+            </div>
+
+            <div class="label-large" style="margin-bottom: 8px; margin-top: 8px; color: var(--md-sys-color-primary);">Isolation</div>
+
+            <div class="card" style="display: flex; align-items: center; gap: 16px;">
+                <div style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center;">D</div>
+                <div>
+                    <div class="card-title">Dumbbell Curl</div>
+                    <div class="body-small" style="color: var(--md-sys-color-on-surface-variant);">Biceps • Max: 16kg</div>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- FAB to create exercise -->
+        <div class="btn-fab">
+            <span class="icon" style="font-size: 24px;">+</span>
+        </div>
+
+        <div class="navigation-bar">
+            <div class="nav-item">
+                <div class="nav-icon"><span class="icon">🏠</span></div>
+                <span>Home</span>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon"><span class="icon">📜</span></div>
+                <span>History</span>
+            </div>
+            <div class="nav-item active">
+                <div class="nav-icon"><span class="icon">💪</span></div>
+                <span>Exercises</span>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
