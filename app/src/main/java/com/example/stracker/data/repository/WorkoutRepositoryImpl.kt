@@ -28,36 +28,32 @@ class WorkoutRepositoryImpl @Inject constructor(
 ) : WorkoutRepository {
     
     override fun getAllWorkouts(): Flow<List<Workout>> =
-        workoutDao.getAllWorkouts().map { list ->
-            list.map { entity -> loadWorkoutWithExercises(entity) }
+        workoutDao.getAllWorkoutsWithExercises().map { list ->
+            list.map { it.toDomain() }
         }
     
     override fun getCompletedWorkouts(): Flow<List<Workout>> =
-        workoutDao.getCompletedWorkouts().map { list ->
-            list.map { entity -> loadWorkoutWithExercises(entity) }
+        workoutDao.getAllWorkoutsWithExercises().map { list ->
+            list.filter { it.workout.isCompleted }.map { it.toDomain() }
         }
     
     override fun getActiveWorkoutFlow(): Flow<Workout?> =
-        workoutDao.getActiveWorkoutFlow().map { entity ->
-            entity?.let { loadWorkoutWithExercises(it) }
-        }
+        workoutDao.getActiveWorkoutWithExercisesFlow().map { it?.toDomain() }
     
     override fun getWorkoutByIdFlow(id: Long): Flow<Workout?> =
-        workoutDao.getWorkoutByIdFlow(id).map { entity ->
-            entity?.let { loadWorkoutWithExercises(it) }
-        }
+        workoutDao.getWorkoutWithExercisesByIdFlow(id).map { it?.toDomain() }
     
     override fun getCompletedWorkoutsCount(): Flow<Int> =
         workoutDao.getCompletedWorkoutsCount()
     
     override suspend fun getActiveWorkout(): Workout? =
-        workoutDao.getActiveWorkout()?.let { loadWorkoutWithExercises(it) }
+        workoutDao.getActiveWorkoutWithExercises()?.toDomain()
     
     override suspend fun getWorkoutById(id: Long): Workout? =
-        workoutDao.getWorkoutById(id)?.let { loadWorkoutWithExercises(it) }
+        workoutDao.getWorkoutWithExercisesById(id)?.toDomain()
     
     override suspend fun getLastCompletedWorkout(): Workout? =
-        workoutDao.getLastCompletedWorkout()?.let { loadWorkoutWithExercises(it) }
+        workoutDao.getLastCompletedWorkoutWithExercises()?.toDomain()
     
     override suspend fun startWorkout(): Long {
         val workout = WorkoutEntity(
@@ -144,10 +140,5 @@ class WorkoutRepositoryImpl @Inject constructor(
             val sets = setDao.getSetsForWorkoutExerciseSync(we.id)
             we.toDomain(exercise.toDomain(), sets.map { it.toDomain() })
         }
-    }
-    
-    private suspend fun loadWorkoutWithExercises(entity: WorkoutEntity): Workout {
-        val exercises = getExercisesForWorkout(entity.id)
-        return entity.toDomain(exercises)
     }
 }

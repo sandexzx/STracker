@@ -2,10 +2,35 @@ package com.example.stracker.data.local.dao
 
 import androidx.room.*
 import com.example.stracker.data.local.entity.WorkoutEntity
+import com.example.stracker.data.local.entity.WorkoutWithExercises
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WorkoutDao {
+    
+    @Transaction
+    @Query("SELECT * FROM workouts ORDER BY startedAt DESC")
+    fun getAllWorkoutsWithExercises(): Flow<List<WorkoutWithExercises>>
+    
+    @Transaction
+    @Query("SELECT * FROM workouts WHERE id = :id")
+    fun getWorkoutWithExercisesByIdFlow(id: Long): Flow<WorkoutWithExercises?>
+    
+    @Transaction
+    @Query("SELECT * FROM workouts WHERE isCompleted = 0 LIMIT 1")
+    fun getActiveWorkoutWithExercisesFlow(): Flow<WorkoutWithExercises?>
+    
+    @Transaction
+    @Query("SELECT * FROM workouts WHERE id = :id")
+    suspend fun getWorkoutWithExercisesById(id: Long): WorkoutWithExercises?
+    
+    @Transaction
+    @Query("SELECT * FROM workouts WHERE isCompleted = 0 LIMIT 1")
+    suspend fun getActiveWorkoutWithExercises(): WorkoutWithExercises?
+    
+    @Transaction
+    @Query("SELECT * FROM workouts WHERE isCompleted = 1 ORDER BY startedAt DESC LIMIT 1")
+    suspend fun getLastCompletedWorkoutWithExercises(): WorkoutWithExercises?
     
     @Query("SELECT * FROM workouts ORDER BY startedAt DESC")
     fun getAllWorkouts(): Flow<List<WorkoutEntity>>

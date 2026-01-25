@@ -1,9 +1,6 @@
 package com.example.stracker.data.mapper
 
-import com.example.stracker.data.local.entity.ExerciseEntity
-import com.example.stracker.data.local.entity.SetEntity
-import com.example.stracker.data.local.entity.WorkoutEntity
-import com.example.stracker.data.local.entity.WorkoutExerciseEntity
+import com.example.stracker.data.local.entity.*
 import com.example.stracker.domain.model.*
 import kotlinx.datetime.Instant
 
@@ -83,4 +80,13 @@ fun WorkoutExercise.toEntity(workoutId: Long): WorkoutExerciseEntity = WorkoutEx
     exerciseId = exercise.id,
     order = order,
     restSeconds = restSeconds
+)
+
+fun WorkoutExerciseWithSets.toDomain(): WorkoutExercise = workoutExercise.toDomain(
+    exercise = exercise.toDomain(),
+    sets = sets.map { it.toDomain() }
+)
+
+fun WorkoutWithExercises.toDomain(): Workout = workout.toDomain(
+    exercises = exercises.map { it.toDomain() }.sortedBy { it.order }
 )
