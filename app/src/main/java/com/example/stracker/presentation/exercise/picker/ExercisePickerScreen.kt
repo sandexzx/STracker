@@ -133,15 +133,9 @@ fun ExercisePickerScreen(
                 onClick = { viewModel.onMuscleGroupSelect(null) }
             )
             
-            listOf(
-                MuscleGroup.CHEST to "Грудь",
-                MuscleGroup.BACK to "Спина",
-                MuscleGroup.QUADRICEPS to "Ноги",
-                MuscleGroup.SHOULDERS to "Плечи",
-                MuscleGroup.BICEPS to "Руки"
-            ).forEach { (group, name) ->
+            MuscleGroup.entries.forEach { group ->
                 FilterChip(
-                    text = name,
+                    text = group.displayName,
                     isSelected = state.selectedMuscleGroup == group,
                     onClick = { viewModel.onMuscleGroupSelect(group) }
                 )

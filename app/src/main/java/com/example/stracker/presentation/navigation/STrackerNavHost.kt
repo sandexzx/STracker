@@ -7,11 +7,14 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.stracker.presentation.exercise.create.CreateExerciseScreen
 import com.example.stracker.presentation.exercise.detail.ExerciseDetailScreen
 import com.example.stracker.presentation.exercise.library.ExerciseLibraryScreen
 import com.example.stracker.presentation.exercise.picker.ExercisePickerScreen
 import com.example.stracker.presentation.home.HomeScreen
+import com.example.stracker.presentation.settings.SettingsScreen
 import com.example.stracker.presentation.workout.active.ActiveWorkoutScreen
+import com.example.stracker.presentation.workout.detail.WorkoutDetailScreen
 import com.example.stracker.presentation.workout.history.WorkoutHistoryScreen
 
 @Composable
@@ -37,6 +40,9 @@ fun STrackerNavHost(
                 },
                 onContinueWorkout = { workoutId ->
                     navController.navigate(Screen.ActiveWorkout.createRoute(workoutId))
+                },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
                 }
             )
         }
@@ -65,7 +71,25 @@ fun STrackerNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onWorkoutClick = { workoutId ->
                     navController.navigate(Screen.WorkoutDetail.createRoute(workoutId))
+                },
+                onNavigateToExercises = {
+                    navController.navigate(Screen.ExerciseLibrary.route) {
+                        popUpTo(Screen.Home.route)
+                    }
                 }
+            )
+        }
+        
+        composable(
+            route = Screen.WorkoutDetail.route,
+            arguments = listOf(
+                navArgument("workoutId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val workoutId = backStackEntry.arguments?.getLong("workoutId") ?: return@composable
+            WorkoutDetailScreen(
+                workoutId = workoutId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
         
@@ -77,7 +101,19 @@ fun STrackerNavHost(
                 },
                 onCreateExercise = {
                     navController.navigate(Screen.CreateExercise.route)
+                },
+                onNavigateToHistory = {
+                    navController.navigate(Screen.WorkoutHistory.route) {
+                        popUpTo(Screen.Home.route)
+                    }
                 }
+            )
+        }
+        
+        composable(Screen.CreateExercise.route) {
+            CreateExerciseScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onExerciseCreated = { navController.popBackStack() }
             )
         }
         
@@ -107,6 +143,12 @@ fun STrackerNavHost(
                 onExerciseSelected = { 
                     navController.popBackStack()
                 }
+            )
+        }
+        
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

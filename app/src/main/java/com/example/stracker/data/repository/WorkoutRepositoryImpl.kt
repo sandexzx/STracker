@@ -99,7 +99,8 @@ class WorkoutRepositoryImpl @Inject constructor(
         workoutExerciseId: Long,
         weight: Float,
         reps: Int,
-        rpe: Int?
+        rpe: Int?,
+        isWarmup: Boolean
     ): Long {
         val maxSetNumber = setDao.getMaxSetNumber(workoutExerciseId) ?: 0
         val set = SetEntity(
@@ -108,7 +109,8 @@ class WorkoutRepositoryImpl @Inject constructor(
             weight = weight,
             reps = reps,
             rpe = rpe,
-            isCompleted = true
+            isCompleted = true,
+            isWarmup = isWarmup
         )
         return setDao.insertSet(set)
     }

@@ -33,6 +33,7 @@ fun ExerciseLibraryScreen(
     onNavigateBack: () -> Unit,
     onExerciseClick: (Long) -> Unit,
     onCreateExercise: () -> Unit,
+    onNavigateToHistory: () -> Unit,
     viewModel: ExerciseLibraryViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -137,15 +138,9 @@ fun ExerciseLibraryScreen(
                     onClick = { viewModel.onMuscleGroupSelect(null) }
                 )
                 
-                listOf(
-                    MuscleGroup.CHEST to "Грудь",
-                    MuscleGroup.BACK to "Спина",
-                    MuscleGroup.QUADRICEPS to "Ноги",
-                    MuscleGroup.SHOULDERS to "Плечи",
-                    MuscleGroup.BICEPS to "Руки"
-                ).forEach { (group, name) ->
+                MuscleGroup.entries.forEach { group ->
                     FilterChip(
-                        text = name,
+                        text = group.displayName,
                         isSelected = state.selectedMuscleGroup == group,
                         onClick = { viewModel.onMuscleGroupSelect(group) }
                     )
@@ -214,7 +209,7 @@ fun ExerciseLibraryScreen(
             onNavigate = { item ->
                 when (item) {
                     BottomNavItem.HOME -> onNavigateBack()
-                    BottomNavItem.HISTORY -> { /* Navigate */ }
+                    BottomNavItem.HISTORY -> onNavigateToHistory()
                     BottomNavItem.EXERCISES -> { /* Already here */ }
                 }
             },

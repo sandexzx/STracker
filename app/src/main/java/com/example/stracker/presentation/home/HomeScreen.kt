@@ -26,6 +26,7 @@ fun HomeScreen(
     onNavigateToHistory: () -> Unit,
     onNavigateToExercises: () -> Unit,
     onContinueWorkout: (Long) -> Unit,
+    onNavigateToSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -41,17 +42,25 @@ fun HomeScreen(
             .fillMaxSize()
             .background(Background)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Accent)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = "STracker",
@@ -59,7 +68,7 @@ fun HomeScreen(
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary
                 )
-                Pill(text = "⚙️ Настройки")
+                Pill(text = "⚙️ Настройки", onClick = onNavigateToSettings)
             }
             
             Spacer(modifier = Modifier.height(24.dp))
@@ -148,8 +157,21 @@ fun HomeScreen(
                 )
             }
             
+            // Error Message
+            state.error?.let { error ->
+                Spacer(modifier = Modifier.height(16.dp))
+                STrackerCard {
+                    Text(
+                        text = "⚠️ $error",
+                        color = Danger,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+            
             // Bottom padding for nav bar
             Spacer(modifier = Modifier.height(80.dp))
+        }
         }
         
         // Bottom Navigation

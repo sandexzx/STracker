@@ -77,9 +77,9 @@ fun ActiveWorkoutScreen(
                             workoutExercise = workoutExercise,
                             lastPerformance = state.lastPerformance[workoutExercise.exercise.id],
                             advice = state.progressionAdvice[workoutExercise.exercise.id],
-                            onAddSet = { weight, reps, rpe ->
+                            onAddSet = { weight, reps, rpe, isWarmup ->
                                 viewModel.onEvent(
-                                    ActiveWorkoutEvent.AddSet(workoutExercise.id, weight, reps, rpe)
+                                    ActiveWorkoutEvent.AddSet(workoutExercise.id, weight, reps, rpe, isWarmup)
                                 )
                             },
                             onDeleteSet = { setId ->
@@ -190,7 +190,7 @@ private fun ExerciseCard(
     workoutExercise: WorkoutExercise,
     lastPerformance: WorkoutExercise?,
     advice: ProgressionAdvice?,
-    onAddSet: (Float, Int, Int?) -> Unit,
+    onAddSet: (Float, Int, Int?, Boolean) -> Unit,
     onDeleteSet: (Long) -> Unit,
     onRemoveExercise: () -> Unit
 ) {
@@ -280,8 +280,8 @@ private fun ExerciseCard(
             lastSet = workoutExercise.sets.lastOrNull(),
             advice = advice,
             onDismiss = { showAddSetDialog = false },
-            onConfirm = { weight, reps, rpe ->
-                onAddSet(weight, reps, rpe)
+            onConfirm = { weight, reps, rpe, isWarmup ->
+                onAddSet(weight, reps, rpe, isWarmup)
                 showAddSetDialog = false
             }
         )
@@ -416,19 +416,26 @@ private fun AddSetDialog(
     lastSet: ExerciseSet?,
     advice: ProgressionAdvice?,
     onDismiss: () -> Unit,
-    onConfirm: (Float, Int, Int?) -> Unit
+    onConfirm: (Float, Int, Int?, Boolean) -> Unit
 ) {
+    // Calculate default values with proper fallback
+    val defaultWeight = advice?.recommendedWeight ?: lastSet?.weight
+    val defaultReps = advice?.recommendedReps ?: lastSet?.reps ?: 8
+    
     var weight by remember { 
         mutableStateOf(
-            (advice?.recommendedWeight ?: lastSet?.weight ?: 0f).toString()
+            defaultWeight?.takeIf { it > 0 }?.toString() ?: ""
         ) 
     }
     var reps by remember { 
-        mutableStateOf(
-            (advice?.recommendedReps ?: lastSet?.reps ?: 8).toString()
-        ) 
+        mutableStateOf(defaultReps.toString()) 
     }
     var rpe by remember { mutableStateOf(lastSet?.rpe?.toString() ?: "") }
+    var showRpeInfo by remember { mutableStateOf(false) }
+    var isWarmup by remember { mutableStateOf(false) }
+    
+    // Weight step based on exercise category (defaulting to 2.5)
+    val weightStep = 2.5f
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -437,26 +444,177 @@ private fun AddSetDialog(
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                OutlinedTextField(
-                    value = weight,
-                    onValueChange = { weight = it },
-                    label = { Text("Вес (кг)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                // Warmup toggle
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Разминочный подход",
+                        color = if (isWarmup) Warning else TextMuted,
+                        fontWeight = if (isWarmup) FontWeight.SemiBold else FontWeight.Normal
+                    )
+                    Switch(
+                        checked = isWarmup,
+                        onCheckedChange = { isWarmup = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Background,
+                            checkedTrackColor = Warning,
+                            uncheckedThumbColor = TextMuted,
+                            uncheckedTrackColor = Card
+                        )
+                    )
+                }
+                // Weight input with +/- buttons
+                Text(
+                    text = "Вес (кг)",
+                    fontSize = 12.sp,
+                    color = TextMuted
                 )
-                OutlinedTextField(
-                    value = reps,
-                    onValueChange = { reps = it },
-                    label = { Text("Повторения") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IconButton(
+                        onClick = {
+                            val current = weight.toFloatOrNull() ?: 0f
+                            weight = (current - weightStep).coerceAtLeast(0f).toString()
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Card)
+                    ) {
+                        Text("-", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    }
+                    
+                    OutlinedTextField(
+                        value = weight,
+                        onValueChange = { weight = it },
+                        placeholder = { Text("0.0", color = TextMuted) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        singleLine = true,
+                        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    IconButton(
+                        onClick = {
+                            val current = weight.toFloatOrNull() ?: 0f
+                            weight = (current + weightStep).toString()
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Card)
+                    ) {
+                        Text("+", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    }
+                }
+                
+                // Reps input with +/- buttons
+                Text(
+                    text = "Повторения",
+                    fontSize = 12.sp,
+                    color = TextMuted
                 )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    IconButton(
+                        onClick = {
+                            val current = reps.toIntOrNull() ?: 0
+                            reps = (current - 1).coerceAtLeast(1).toString()
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Card)
+                    ) {
+                        Text("-", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    }
+                    
+                    OutlinedTextField(
+                        value = reps,
+                        onValueChange = { reps = it },
+                        placeholder = { Text("8", color = TextMuted) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    IconButton(
+                        onClick = {
+                            val current = reps.toIntOrNull() ?: 0
+                            reps = (current + 1).toString()
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Card)
+                    ) {
+                        Text("+", color = TextPrimary, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    }
+                }
+                
+                // RPE input with info icon
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = "RPE (1-10, опционально)",
+                        fontSize = 12.sp,
+                        color = TextMuted
+                    )
+                    IconButton(
+                        onClick = { showRpeInfo = !showRpeInfo },
+                        modifier = Modifier.size(20.dp)
+                    ) {
+                        Text("ⓘ", fontSize = 14.sp, color = Accent)
+                    }
+                }
+                
+                if (showRpeInfo) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Accent.copy(alpha = 0.1f))
+                            .padding(12.dp)
+                    ) {
+                        Text(
+                            text = "RPE (Rate of Perceived Exertion)",
+                            fontWeight = FontWeight.SemiBold,
+                            color = TextPrimary,
+                            fontSize = 12.sp
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Субъективная оценка усилия от 1 до 10:\n" +
+                                   "• 6-7: Могу сделать ещё 3-4 повтора\n" +
+                                   "• 8: Могу сделать ещё 2 повтора\n" +
+                                   "• 9: Могу сделать ещё 1 повтор\n" +
+                                   "• 10: Максимальное усилие",
+                            color = TextMuted,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+                
                 OutlinedTextField(
                     value = rpe,
-                    onValueChange = { rpe = it },
-                    label = { Text("RPE (1-10, опционально)") },
+                    onValueChange = { 
+                        val newValue = it.filter { c -> c.isDigit() }
+                        val intValue = newValue.toIntOrNull()
+                        if (intValue == null || intValue in 1..10) {
+                            rpe = newValue
+                        }
+                    },
+                    placeholder = { Text("-", color = TextMuted) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -470,7 +628,7 @@ private fun AddSetDialog(
                     val r = reps.toIntOrNull() ?: 0
                     val rpeValue = rpe.toIntOrNull()?.coerceIn(1, 10)
                     if (w > 0 && r > 0) {
-                        onConfirm(w, r, rpeValue)
+                        onConfirm(w, r, rpeValue, isWarmup)
                     }
                 }
             ) {

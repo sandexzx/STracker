@@ -17,4 +17,5 @@ sealed class Screen(val route: String) {
     data object ExercisePicker : Screen("exercises/picker/{workoutId}") {
         fun createRoute(workoutId: Long) = "exercises/picker/$workoutId"
     }
+    data object Settings : Screen("settings")
 }

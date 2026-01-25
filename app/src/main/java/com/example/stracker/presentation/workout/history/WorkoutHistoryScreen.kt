@@ -1,6 +1,7 @@
 package com.example.stracker.presentation.workout.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,6 +25,7 @@ import kotlinx.datetime.toLocalDateTime
 fun WorkoutHistoryScreen(
     onNavigateBack: () -> Unit,
     onWorkoutClick: (Long) -> Unit,
+    onNavigateToExercises: () -> Unit,
     viewModel: WorkoutHistoryViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -61,7 +63,10 @@ fun WorkoutHistoryScreen(
                     )
                 }
                 
-                Pill(text = "Фильтр")
+                Pill(
+                    text = "🔽 ${state.filter.displayName}",
+                    onClick = { viewModel.onEvent(WorkoutHistoryEvent.ShowFilterDialog) }
+                )
             }
             
             // Content
@@ -129,13 +134,51 @@ fun WorkoutHistoryScreen(
                 when (item) {
                     BottomNavItem.HOME -> onNavigateBack()
                     BottomNavItem.HISTORY -> { /* Already here */ }
-                    BottomNavItem.EXERCISES -> { /* Navigate */ }
+                    BottomNavItem.EXERCISES -> onNavigateToExercises()
                 }
             },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(16.dp)
         )
+        
+        // Filter Dialog
+        if (state.showFilterDialog) {
+            AlertDialog(
+                onDismissRequest = { viewModel.onEvent(WorkoutHistoryEvent.HideFilterDialog) },
+                title = { Text("Фильтр по периоду") },
+                text = {
+                    Column {
+                        HistoryFilter.entries.forEach { filter ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { viewModel.onEvent(WorkoutHistoryEvent.SetFilter(filter)) }
+                                    .padding(vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = state.filter == filter,
+                                    onClick = { viewModel.onEvent(WorkoutHistoryEvent.SetFilter(filter)) },
+                                    colors = RadioButtonDefaults.colors(selectedColor = Accent)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = filter.displayName,
+                                    color = if (state.filter == filter) TextPrimary else TextMuted
+                                )
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { viewModel.onEvent(WorkoutHistoryEvent.HideFilterDialog) }) {
+                        Text("Закрыть")
+                    }
+                },
+                containerColor = Panel
+            )
+        }
     }
 }
 

@@ -36,7 +36,7 @@ class ActiveWorkoutViewModel @Inject constructor(
         when (event) {
             is ActiveWorkoutEvent.AddExercise -> { /* Handled by navigation */ }
             is ActiveWorkoutEvent.RemoveExercise -> removeExercise(event.workoutExerciseId)
-            is ActiveWorkoutEvent.AddSet -> addSet(event.workoutExerciseId, event.weight, event.reps, event.rpe)
+            is ActiveWorkoutEvent.AddSet -> addSet(event.workoutExerciseId, event.weight, event.reps, event.rpe, event.isWarmup)
             is ActiveWorkoutEvent.UpdateSet -> updateSet(event.setId, event.weight, event.reps, event.rpe, event.workoutExerciseId)
             is ActiveWorkoutEvent.DeleteSet -> deleteSet(event.setId)
             ActiveWorkoutEvent.ShowFinishDialog -> _state.update { it.copy(showFinishDialog = true) }
@@ -95,10 +95,10 @@ class ActiveWorkoutViewModel @Inject constructor(
         }
     }
     
-    private fun addSet(workoutExerciseId: Long, weight: Float, reps: Int, rpe: Int?) {
+    private fun addSet(workoutExerciseId: Long, weight: Float, reps: Int, rpe: Int?, isWarmup: Boolean = false) {
         viewModelScope.launch {
             try {
-                workoutRepository.addSet(workoutExerciseId, weight, reps, rpe)
+                workoutRepository.addSet(workoutExerciseId, weight, reps, rpe, isWarmup)
             } catch (e: Exception) {
                 _state.update { it.copy(error = e.message) }
             }
