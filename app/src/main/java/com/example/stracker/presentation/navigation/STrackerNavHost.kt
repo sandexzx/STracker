@@ -64,7 +64,7 @@ fun STrackerNavHost(
             WorkoutHistoryScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onWorkoutClick = { workoutId ->
-                    // TODO: Navigate to workout detail
+                    navController.navigate(Screen.WorkoutDetail.createRoute(workoutId))
                 }
             )
         }
