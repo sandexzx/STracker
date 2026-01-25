@@ -419,18 +419,20 @@ private fun AddSetDialog(
     onConfirm: (Float, Int, Int?, Boolean) -> Unit
 ) {
     // Calculate default values with proper fallback
-    val defaultWeight = advice?.recommendedWeight ?: lastSet?.weight
-    val defaultReps = advice?.recommendedReps ?: lastSet?.reps ?: 8
+    // We prefer values from the last set in the current workout if available
+    val defaultWeight = lastSet?.weight ?: advice?.recommendedWeight
+    val defaultReps = lastSet?.reps ?: advice?.recommendedReps ?: 8
     
-    var weight by remember { 
+    // Using keys in remember to ensure state is reset when inputs change or dialog is reused
+    var weight by remember(lastSet, advice) { 
         mutableStateOf(
             defaultWeight?.takeIf { it > 0 }?.toString() ?: ""
         ) 
     }
-    var reps by remember { 
+    var reps by remember(lastSet, advice) { 
         mutableStateOf(defaultReps.toString()) 
     }
-    var rpe by remember { mutableStateOf(lastSet?.rpe?.toString() ?: "") }
+    var rpe by remember(lastSet) { mutableStateOf(lastSet?.rpe?.toString() ?: "") }
     var showRpeInfo by remember { mutableStateOf(false) }
     var isWarmup by remember { mutableStateOf(false) }
     
@@ -492,7 +494,14 @@ private fun AddSetDialog(
                     OutlinedTextField(
                         value = weight,
                         onValueChange = { weight = it },
-                        placeholder = { Text("0.0", color = TextMuted) },
+                        placeholder = { 
+                            Text(
+                                text = "0.0", 
+                                color = TextMuted,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            ) 
+                        },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
                         textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
@@ -538,8 +547,15 @@ private fun AddSetDialog(
                     
                     OutlinedTextField(
                         value = reps,
-                        onValueChange = { reps = it },
-                        placeholder = { Text("8", color = TextMuted) },
+                        onValueChange = { reps = it.filter { c -> c.isDigit() } },
+                        placeholder = { 
+                            Text(
+                                text = "8", 
+                                color = TextMuted,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            ) 
+                        },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
@@ -614,9 +630,17 @@ private fun AddSetDialog(
                             rpe = newValue
                         }
                     },
-                    placeholder = { Text("-", color = TextMuted) },
+                    placeholder = { 
+                        Text(
+                            text = "-", 
+                            color = TextMuted,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        ) 
+                    },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
+                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
