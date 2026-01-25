@@ -7,6 +7,8 @@ import com.example.stracker.domain.model.WorkoutExercise
 data class ActiveWorkoutState(
     val workout: Workout? = null,
     val elapsedSeconds: Long = 0,
+    val restTimerSeconds: Int? = null,
+    val restTimerTotalSeconds: Int? = null,
     val lastPerformance: Map<Long, WorkoutExercise> = emptyMap(),
     val progressionAdvice: Map<Long, ProgressionAdvice> = emptyMap(),
     val isLoading: Boolean = true,
@@ -27,4 +29,6 @@ sealed interface ActiveWorkoutEvent {
     data object HideDiscardDialog : ActiveWorkoutEvent
     data class FinishWorkout(val note: String?) : ActiveWorkoutEvent
     data object DiscardWorkout : ActiveWorkoutEvent
+    data object SkipRestTimer : ActiveWorkoutEvent
+    data class AddRestTime(val seconds: Int) : ActiveWorkoutEvent
 }

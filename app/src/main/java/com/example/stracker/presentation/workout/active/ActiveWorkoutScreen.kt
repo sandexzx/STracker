@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -142,6 +143,22 @@ fun ActiveWorkoutScreen(
                 },
                 containerColor = Panel
             )
+        }
+
+        // Rest Timer Overlay
+        state.restTimerSeconds?.let { seconds ->
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+            ) {
+                RestTimerOverlay(
+                    seconds = seconds,
+                    totalSeconds = state.restTimerTotalSeconds ?: seconds,
+                    onSkip = { viewModel.onEvent(ActiveWorkoutEvent.SkipRestTimer) },
+                    onAdd30s = { viewModel.onEvent(ActiveWorkoutEvent.AddRestTime(30)) }
+                )
+            }
         }
     }
 }
@@ -705,4 +722,88 @@ private fun FinishWorkoutDialog(
         },
         containerColor = Panel
     )
+}
+
+@Composable
+private fun RestTimerOverlay(
+    seconds: Int,
+    totalSeconds: Int,
+    onSkip: () -> Unit,
+    onAdd30s: () -> Unit
+) {
+    val minutes = seconds / 60
+    val remainingSeconds = seconds % 60
+    val timeString = String.format("%d:%02d", minutes, remainingSeconds)
+    val progress = seconds.toFloat() / totalSeconds.coerceAtLeast(1).toFloat()
+
+    STrackerCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Отдых",
+                        fontSize = 12.sp,
+                        color = TextMuted
+                    )
+                    Text(
+                        text = timeString,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Accent
+                    )
+                }
+                
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Small +30s button
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Panel)
+                            .border(1.dp, Border, RoundedCornerShape(12.dp))
+                            .clickable { onAdd30s() }
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Text("+30с", color = TextPrimary, fontSize = 14.sp)
+                    }
+
+                    // Skip button
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Accent)
+                            .clickable { onSkip() }
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Text("Пропустить", color = Background, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+            
+            // Progress Bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .clip(CircleShape)
+                    .background(Border)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(progress)
+                        .fillMaxHeight()
+                        .background(Accent)
+                )
+            }
+        }
+    }
 }

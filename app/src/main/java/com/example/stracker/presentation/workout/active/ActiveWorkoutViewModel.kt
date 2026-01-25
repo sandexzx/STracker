@@ -3,10 +3,12 @@ package com.example.stracker.presentation.workout.active
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.stracker.data.local.SettingsDataStore
 import com.example.stracker.domain.model.ExerciseSet
 import com.example.stracker.domain.repository.WorkoutRepository
 import com.example.stracker.domain.usecase.progression.GetProgressionAdviceUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -16,7 +18,8 @@ import javax.inject.Inject
 class ActiveWorkoutViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val workoutRepository: WorkoutRepository,
-    private val getProgressionAdviceUseCase: GetProgressionAdviceUseCase
+    private val getProgressionAdviceUseCase: GetProgressionAdviceUseCase,
+    private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
     
     private val workoutId: Long = savedStateHandle.get<Long>("workoutId") ?: 0L
@@ -26,6 +29,8 @@ class ActiveWorkoutViewModel @Inject constructor(
     
     private val _workoutFinished = MutableSharedFlow<Unit>()
     val workoutFinished: SharedFlow<Unit> = _workoutFinished.asSharedFlow()
+
+    private var restTimerJob: Job? = null
     
     init {
         loadWorkout()
@@ -45,6 +50,8 @@ class ActiveWorkoutViewModel @Inject constructor(
             ActiveWorkoutEvent.HideDiscardDialog -> _state.update { it.copy(showDiscardDialog = false) }
             is ActiveWorkoutEvent.FinishWorkout -> finishWorkout(event.note)
             ActiveWorkoutEvent.DiscardWorkout -> discardWorkout()
+            ActiveWorkoutEvent.SkipRestTimer -> stopRestTimer()
+            is ActiveWorkoutEvent.AddRestTime -> addRestTime(event.seconds)
         }
     }
     
@@ -99,9 +106,56 @@ class ActiveWorkoutViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 workoutRepository.addSet(workoutExerciseId, weight, reps, rpe, isWarmup)
+                
+                // Start rest timer if enabled
+                val settings = settingsDataStore.settings.first()
+                if (settings.restTimerEnabled) {
+                    startRestTimer(settings.defaultRestSeconds)
+                }
             } catch (e: Exception) {
                 _state.update { it.copy(error = e.message) }
             }
+        }
+    }
+
+    private fun startRestTimer(seconds: Int) {
+        restTimerJob?.cancel()
+        _state.update { it.copy(restTimerSeconds = seconds, restTimerTotalSeconds = seconds) }
+        
+        restTimerJob = viewModelScope.launch {
+            var remaining = seconds
+            while (remaining > 0) {
+                delay(1000)
+                remaining--
+                _state.update { it.copy(restTimerSeconds = remaining) }
+            }
+            _state.update { it.copy(restTimerSeconds = null, restTimerTotalSeconds = null) }
+        }
+    }
+
+    private fun stopRestTimer() {
+        restTimerJob?.cancel()
+        _state.update { it.copy(restTimerSeconds = null, restTimerTotalSeconds = null) }
+    }
+
+    private fun addRestTime(seconds: Int) {
+        val currentRemaining = _state.value.restTimerSeconds ?: 0
+        val currentTotal = _state.value.restTimerTotalSeconds ?: 0
+        
+        val newRemaining = currentRemaining + seconds
+        val newTotal = currentTotal + seconds
+        
+        restTimerJob?.cancel()
+        _state.update { it.copy(restTimerSeconds = newRemaining, restTimerTotalSeconds = newTotal) }
+        
+        restTimerJob = viewModelScope.launch {
+            var remaining = newRemaining
+            while (remaining > 0) {
+                delay(1000)
+                remaining--
+                _state.update { it.copy(restTimerSeconds = remaining) }
+            }
+            _state.update { it.copy(restTimerSeconds = null, restTimerTotalSeconds = null) }
         }
     }
     
