@@ -1,23 +1,27 @@
 package com.example.stracker.presentation.exercise.create
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.stracker.domain.model.Exercise
 import com.example.stracker.domain.model.ExerciseCategory
 import com.example.stracker.domain.model.MuscleGroup
-import com.example.stracker.domain.repository.ExerciseRepository
+import com.example.stracker.domain.usecase.exercise.ExerciseUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class CreateExerciseState(
+    val id: Long = 0,
     val name: String = "",
     val category: ExerciseCategory = ExerciseCategory.COMPOUND,
     val primaryMuscle: MuscleGroup = MuscleGroup.CHEST,
     val secondaryMuscles: List<MuscleGroup> = emptyList(),
     val notes: String = "",
+    val isCustom: Boolean = true,
     val isLoading: Boolean = false,
+    val isEditing: Boolean = false,
     val error: String? = null,
     val nameError: String? = null
 )
@@ -33,7 +37,8 @@ sealed class CreateExerciseEvent {
 
 @HiltViewModel
 class CreateExerciseViewModel @Inject constructor(
-    private val exerciseRepository: ExerciseRepository
+    private val exerciseUseCases: ExerciseUseCases,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     
     private val _state = MutableStateFlow(CreateExerciseState())
@@ -41,6 +46,35 @@ class CreateExerciseViewModel @Inject constructor(
     
     private val _exerciseCreated = MutableSharedFlow<Unit>()
     val exerciseCreated: SharedFlow<Unit> = _exerciseCreated.asSharedFlow()
+    
+    private val exerciseId: Long = savedStateHandle.get<Long>("exerciseId") ?: -1L
+    
+    init {
+        if (exerciseId != -1L) {
+            loadExercise(exerciseId)
+        }
+    }
+    
+    private fun loadExercise(id: Long) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, isEditing = true) }
+            val exercise = exerciseUseCases.getExercise(id)
+            if (exercise != null) {
+                _state.update { it.copy(
+                    id = exercise.id,
+                    name = exercise.name,
+                    category = exercise.category,
+                    primaryMuscle = exercise.primaryMuscle,
+                    secondaryMuscles = exercise.secondaryMuscles,
+                    notes = exercise.notes ?: "",
+                    isCustom = exercise.isCustom,
+                    isLoading = false
+                ) }
+            } else {
+                _state.update { it.copy(isLoading = false, error = "Упражнение не найдено") }
+            }
+        }
+    }
     
     fun onEvent(event: CreateExerciseEvent) {
         when (event) {
@@ -82,13 +116,15 @@ class CreateExerciseViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
             try {
                 val exercise = Exercise(
+                    id = currentState.id,
                     name = currentState.name.trim(),
                     category = currentState.category,
                     primaryMuscle = currentState.primaryMuscle,
                     secondaryMuscles = currentState.secondaryMuscles,
-                    notes = currentState.notes.ifBlank { null }
+                    notes = currentState.notes.ifBlank { null },
+                    isCustom = currentState.isCustom
                 )
-                exerciseRepository.insertExercise(exercise)
+                exerciseUseCases.saveExercise(exercise)
                 _exerciseCreated.emit(Unit)
             } catch (e: Exception) {
                 _state.update { it.copy(error = e.message, isLoading = false) }

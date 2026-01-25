@@ -64,7 +64,7 @@ fun CreateExerciseScreen(
                     )
                 }
                 Text(
-                    text = "Новое упражнение",
+                    text = if (state.isEditing) "Редактировать упражнение" else "Новое упражнение",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextPrimary

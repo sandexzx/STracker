@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,9 +36,43 @@ import kotlinx.datetime.toLocalDateTime
 fun ExerciseDetailScreen(
     exerciseId: Long,
     onNavigateBack: () -> Unit,
+    onEditExercise: (Long) -> Unit,
+    onExerciseDeleted: () -> Unit,
     viewModel: ExerciseDetailViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.exerciseDeleted.collect {
+            onExerciseDeleted()
+        }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Удалить упражнение?", color = TextPrimary) },
+            text = { Text("Это действие нельзя отменить. Все данные о выполнении этого упражнения будут удалены.", color = TextPrimary) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteExercise()
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Удалить", color = Danger)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Отмена", color = TextPrimary)
+                }
+            },
+            containerColor = Card
+        )
+    }
     
     Column(
         modifier = Modifier
@@ -52,6 +88,7 @@ fun ExerciseDetailScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -66,11 +103,30 @@ fun ExerciseDetailScreen(
                     text = state.exercise?.name ?: "Упражнение",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = TextPrimary,
+                    maxLines = 1
                 )
             }
             
-            Pill(text = "📈 e1RM")
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                IconButton(onClick = { showDeleteDialog = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Удалить",
+                        tint = Danger
+                    )
+                }
+                IconButton(onClick = { onEditExercise(exerciseId) }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Редактировать",
+                        tint = Accent
+                    )
+                }
+            }
         }
         
         LazyColumn(

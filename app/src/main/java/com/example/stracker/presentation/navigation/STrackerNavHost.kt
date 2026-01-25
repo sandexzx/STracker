@@ -100,7 +100,7 @@ fun STrackerNavHost(
                     navController.navigate(Screen.ExerciseDetail.createRoute(exerciseId))
                 },
                 onCreateExercise = {
-                    navController.navigate(Screen.CreateExercise.route)
+                    navController.navigate(Screen.CreateExercise.createRoute())
                 },
                 onNavigateToHistory = {
                     navController.navigate(Screen.WorkoutHistory.route) {
@@ -110,7 +110,15 @@ fun STrackerNavHost(
             )
         }
         
-        composable(Screen.CreateExercise.route) {
+        composable(
+            route = Screen.CreateExercise.route,
+            arguments = listOf(
+                navArgument("exerciseId") { 
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) {
             CreateExerciseScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onExerciseCreated = { navController.popBackStack() }
@@ -126,7 +134,13 @@ fun STrackerNavHost(
             val exerciseId = backStackEntry.arguments?.getLong("exerciseId") ?: return@composable
             ExerciseDetailScreen(
                 exerciseId = exerciseId,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onEditExercise = { id ->
+                    navController.navigate(Screen.CreateExercise.createRoute(id))
+                },
+                onExerciseDeleted = {
+                    navController.popBackStack()
+                }
             )
         }
         

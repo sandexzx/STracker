@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.stracker.domain.model.Exercise
 import com.example.stracker.domain.model.ExerciseCategory
 import com.example.stracker.domain.model.MuscleGroup
-import com.example.stracker.domain.repository.ExerciseRepository
+import com.example.stracker.domain.usecase.exercise.ExerciseUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -30,7 +30,7 @@ data class ExerciseLibraryState(
 
 @HiltViewModel
 class ExerciseLibraryViewModel @Inject constructor(
-    private val exerciseRepository: ExerciseRepository
+    private val exerciseUseCases: ExerciseUseCases
 ) : ViewModel() {
     
     private val _state = MutableStateFlow(ExerciseLibraryState())
@@ -42,7 +42,7 @@ class ExerciseLibraryViewModel @Inject constructor(
     
     private fun loadExercises() {
         viewModelScope.launch {
-            exerciseRepository.getAllExercises().collect { exercises ->
+            exerciseUseCases.getExercises().collect { exercises ->
                 _state.update { state ->
                     state.copy(
                         exercises = exercises,
@@ -51,6 +51,12 @@ class ExerciseLibraryViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    fun onDeleteExercise(exercise: Exercise) {
+        viewModelScope.launch {
+            exerciseUseCases.deleteExercise(exercise)
         }
     }
     

@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.stracker.domain.model.Exercise
 import com.example.stracker.domain.model.WorkoutExercise
-import com.example.stracker.domain.repository.ExerciseRepository
 import com.example.stracker.domain.repository.WorkoutRepository
+import com.example.stracker.domain.usecase.exercise.ExerciseUseCases
 import com.example.stracker.domain.usecase.progression.CalculateE1RMUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -19,13 +19,14 @@ data class ExerciseDetailState(
     val e1rmHistory: List<Float> = emptyList(),
     val averageE1RM: Float = 0f,
     val trendPercent: Float = 0f,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val error: String? = null
 )
 
 @HiltViewModel
 class ExerciseDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val exerciseRepository: ExerciseRepository,
+    private val exerciseUseCases: ExerciseUseCases,
     private val workoutRepository: WorkoutRepository,
     private val calculateE1RMUseCase: CalculateE1RMUseCase
 ) : ViewModel() {
@@ -34,6 +35,9 @@ class ExerciseDetailViewModel @Inject constructor(
     
     private val _state = MutableStateFlow(ExerciseDetailState())
     val state: StateFlow<ExerciseDetailState> = _state.asStateFlow()
+
+    private val _exerciseDeleted = MutableSharedFlow<Unit>()
+    val exerciseDeleted: SharedFlow<Unit> = _exerciseDeleted.asSharedFlow()
     
     init {
         loadData()
@@ -44,7 +48,7 @@ class ExerciseDetailViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
             
             try {
-                val exercise = exerciseRepository.getExerciseById(exerciseId)
+                val exercise = exerciseUseCases.getExercise(exerciseId)
                 val performances = workoutRepository.getLastPerformance(exerciseId, limit = 10)
                 
                 // Calculate e1RM for each performance
@@ -73,7 +77,19 @@ class ExerciseDetailViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
-                _state.update { it.copy(isLoading = false) }
+                _state.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun deleteExercise() {
+        val exercise = _state.value.exercise ?: return
+        viewModelScope.launch {
+            try {
+                exerciseUseCases.deleteExercise(exercise)
+                _exerciseDeleted.emit(Unit)
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "Ошибка при удалении: ${e.message}") }
             }
         }
     }

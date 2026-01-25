@@ -31,7 +31,7 @@ class ExerciseRepositoryImpl @Inject constructor(
         exerciseDao.getExerciseById(id)?.toDomain()
     
     override suspend fun insertExercise(exercise: Exercise): Long =
-        exerciseDao.insertExercise(exercise.toEntity(isCustom = true))
+        exerciseDao.insertExercise(exercise.copy(isCustom = true).toEntity())
     
     override suspend fun updateExercise(exercise: Exercise) =
         exerciseDao.updateExercise(exercise.toEntity())

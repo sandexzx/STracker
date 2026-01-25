@@ -6,5 +6,6 @@ data class Exercise(
     val category: ExerciseCategory,
     val primaryMuscle: MuscleGroup,
     val secondaryMuscles: List<MuscleGroup> = emptyList(),
-    val notes: String? = null
+    val notes: String? = null,
+    val isCustom: Boolean = false
 )

@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -162,9 +163,10 @@ fun ExerciseLibraryScreen(
                     }
                     
                     items(state.compoundExercises, key = { it.id }) { exercise ->
-                        ExerciseItem(
+                        SwipeToDeleteExerciseItem(
                             exercise = exercise,
-                            onClick = { onExerciseClick(exercise.id) }
+                            onClick = { onExerciseClick(exercise.id) },
+                            onDelete = { viewModel.onDeleteExercise(exercise) }
                         )
                     }
                 }
@@ -176,9 +178,10 @@ fun ExerciseLibraryScreen(
                     }
                     
                     items(state.accessoryExercises, key = { it.id }) { exercise ->
-                        ExerciseItem(
+                        SwipeToDeleteExerciseItem(
                             exercise = exercise,
-                            onClick = { onExerciseClick(exercise.id) }
+                            onClick = { onExerciseClick(exercise.id) },
+                            onDelete = { viewModel.onDeleteExercise(exercise) }
                         )
                     }
                 }
@@ -190,9 +193,10 @@ fun ExerciseLibraryScreen(
                     }
                     
                     items(state.isolationExercises, key = { it.id }) { exercise ->
-                        ExerciseItem(
+                        SwipeToDeleteExerciseItem(
                             exercise = exercise,
-                            onClick = { onExerciseClick(exercise.id) }
+                            onClick = { onExerciseClick(exercise.id) },
+                            onDelete = { viewModel.onDeleteExercise(exercise) }
                         )
                     }
                 }
@@ -253,6 +257,76 @@ private fun FilterChip(
             .clickable { onClick() }
             .padding(horizontal = 10.dp, vertical = 6.dp)
     )
+}
+
+@Composable
+private fun SwipeToDeleteExerciseItem(
+    exercise: Exercise,
+    onClick: () -> Unit,
+    onDelete: () -> Unit
+) {
+    var showConfirmDialog by remember { mutableStateOf(false) }
+
+    if (showConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = false },
+            title = { Text("Удалить упражнение?") },
+            text = { Text("Вы уверены, что хотите удалить ${exercise.name}?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDelete()
+                    showConfirmDialog = false
+                }) {
+                    Text("Удалить", color = Danger)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConfirmDialog = false }) {
+                    Text("Отмена", color = TextPrimary)
+                }
+            },
+            containerColor = Card
+        )
+    }
+
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.EndToStart) {
+                showConfirmDialog = true
+                false // Don't dismiss automatically, wait for dialog
+            } else false
+        }
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = {
+            val color = if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+                Danger.copy(alpha = 0.2f)
+            } else Color.Transparent
+            
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(color)
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = Danger
+                )
+            }
+        }
+    ) {
+        ExerciseItem(
+            exercise = exercise,
+            onClick = onClick
+        )
+    }
 }
 
 @Composable

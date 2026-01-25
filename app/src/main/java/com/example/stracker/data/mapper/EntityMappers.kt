@@ -12,10 +12,11 @@ fun ExerciseEntity.toDomain(): Exercise = Exercise(
     primaryMuscle = primaryMuscle,
     secondaryMuscles = if (secondaryMuscles.isBlank()) emptyList() 
         else secondaryMuscles.split(",").map { MuscleGroup.valueOf(it) },
-    notes = notes
+    notes = notes,
+    isCustom = isCustom
 )
 
-fun Exercise.toEntity(isCustom: Boolean = false): ExerciseEntity = ExerciseEntity(
+fun Exercise.toEntity(): ExerciseEntity = ExerciseEntity(
     id = id,
     name = name,
     category = category,

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.stracker.domain.model.Exercise
 import com.example.stracker.domain.model.MuscleGroup
-import com.example.stracker.domain.repository.ExerciseRepository
+import com.example.stracker.domain.usecase.exercise.ExerciseUseCases
 import com.example.stracker.domain.repository.WorkoutRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -23,7 +23,7 @@ data class ExercisePickerState(
 @HiltViewModel
 class ExercisePickerViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val exerciseRepository: ExerciseRepository,
+    private val exerciseUseCases: ExerciseUseCases,
     private val workoutRepository: WorkoutRepository
 ) : ViewModel() {
     
@@ -41,7 +41,7 @@ class ExercisePickerViewModel @Inject constructor(
     
     private fun loadExercises() {
         viewModelScope.launch {
-            exerciseRepository.getAllExercises().collect { exercises ->
+            exerciseUseCases.getExercises().collect { exercises ->
                 _state.update { state ->
                     state.copy(
                         exercises = exercises,
